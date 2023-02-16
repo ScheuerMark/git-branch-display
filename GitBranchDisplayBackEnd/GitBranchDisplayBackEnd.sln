@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitBranchDisplayBackEnd", "GitBranchDisplayBackEnd\GitBranchDisplayBackEnd.csproj", "{8655F8EF-8649-42CF-8891-BAC19580BE26}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8655F8EF-8649-42CF-8891-BAC19580BE26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8655F8EF-8649-42CF-8891-BAC19580BE26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8655F8EF-8649-42CF-8891-BAC19580BE26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8655F8EF-8649-42CF-8891-BAC19580BE26}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96CA2791-77DA-4158-86D3-AC01A24D7C01}
+	EndGlobalSection
+EndGlobal
