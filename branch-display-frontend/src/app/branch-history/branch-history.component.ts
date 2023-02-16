@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild,ElementRef  } from '@angular/core';
 import { GitApiService } from '../git-api.service';
 import { DataSet, Edge } from 'vis';
 import { Network } from 'vis';
@@ -10,53 +10,29 @@ import { Network } from 'vis';
   styleUrls: ['./branch-history.component.css']
 })
 export class BranchHistoryComponent implements OnInit {
-  @Input() repoLink: string;
-  @ViewChild('branchGraph') branchGraph: any;
+  @ViewChild('branchHistory', { static: true }) branchHistory!: ElementRef;
 
-  loading: boolean = false;
-  branches: any[] = [];
-
-  constructor(private gitApiService: GitApiService) {this.repoLink="https://github.com/ScheuerMark/test-branches" }
-
-  ngOnInit(): void {
-    this.loading = true;
-    this.gitApiService.getBranchHistory(this.repoLink)
-      .subscribe(data => {
-        this.branches = data;
-        console.log(data)
-        this.loading = false;
-        this.drawBranchGraph();
-      });
-  }
-
-  drawBranchGraph() {
-    const nodes = new DataSet();
+  ngOnInit() {
+    // create a new Vis.js DataSet to hold the data for our branch history
+    const data = new DataSet();
     const edges = new DataSet<Edge>();
-  
-    this.branches.forEach((branch: any) => {
-      const node = {
-        id: branch.name,
-        label: branch.name,
-        shape: "box",
-      };
-      nodes.add(node);
-    });
 
-        // Add edges to show merges
-        this.branches.forEach((branch: any) => {
-          if (branch.merge_commit_sha) {
-            const edge = {
-              from: branch.merge_commit_sha,
-              to: branch.name,
-              arrows: "to",
-            };
-            edges.add(edge);
-          }
-        });
-    
-        const container = this.branchGraph.nativeElement;
-        const data = { nodes: nodes, edges: edges };
-        const options = {};
-        const network = new Network(container, data, options);
+    // add nodes to the DataSet
+    data.add({ id: 1, label: 'master' });
+    data.add({ id: 2, label: 'feature-1' });
+    data.add({ id: 3, label: 'feature-2' });
+    data.add({ id: 4, label: 'feature-3' });
+    data.add({ id: 5, label: 'hotfix-1' });
+
+    // add edges to the DataSet to define the relationships between the nodes
+    edges.add({ from: 1, to: 2 });
+    edges.add({ from: 1, to: 3 });
+    edges.add({ from: 2, to: 4 });
+    edges.add({ from: 1, to: 5 });
+
+    // create a new Vis.js Network instance and attach it to the branchHistory element
+    const options = {};
+    const network = new Network(this.branchHistory.nativeElement, {nodes:data, edges:edges}, options);
   }
 }
+
