@@ -1,11 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using GitBranchDisplayBackEnd.Models;
-using LibGit2Sharp;
+﻿using Microsoft.AspNetCore.Mvc;
+using Octokit;
 
 namespace GitBranchDisplayBackEnd.Controllers
 {
@@ -13,52 +7,59 @@ namespace GitBranchDisplayBackEnd.Controllers
     [ApiController]
     public class Git : ControllerBase
     {
-        [HttpGet]
-        public ActionResult<List<BranchInfo>> Get(string repoLink)
+        private readonly HttpClient _httpClient;
+
+        public Git(HttpClient httpClient)
         {
-            var branchInfoList = new List<BranchInfo>();
-            var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            _httpClient = httpClient;
+        }
 
-            // Clone the repository to a temporary directory
-            Repository.Clone(repoLink, tempDirectory);
+        [HttpGet]
+        public async Task<IActionResult> GetBranchHistory(string repoLink)
+        {
+            var github = new GitHubClient(new ProductHeaderValue("my-app"));
 
+            // Parse the URL to extract the owner and repository names
+            var uri = new Uri(repoLink);
+            var segments = uri.Segments;
+            var owner = segments[1].TrimEnd('/');
+            var repo = segments[2].TrimEnd('/');
 
-            using (var repo = new Repository(tempDirectory))
+            // Get the list of branches for the repository
+            var branches = await github.Repository.Branch.GetAll(owner, repo);
+
+            // For each branch, get the list of commits
+            var branchCommits = new List<List<GitHubCommit>>();
+            foreach (var branch in branches)
             {
-                // Retrieve branch history for each branch
-                foreach (var branch in repo.Branches)
-                {
-                    var branchInfo = new BranchInfo
-                    {
-                        Name = branch.FriendlyName,
-                        Commits = new List<CommitInfo>()
-                    };
-
-                    var branchCommits = repo.Commits.QueryBy(new CommitFilter
-                    {
-                        IncludeReachableFrom = branch.Tip,
-                        ExcludeReachableFrom = branch.Tip.Parents.FirstOrDefault()
-                    });
-
-                    foreach (var commit in branchCommits)
-                    {
-                        var commitInfo = new CommitInfo
-                        {
-                            Sha = commit.Sha,
-                            Message = commit.Message,
-                            Author = commit.Author.Name,
-                            Timestamp = commit.Author.When.LocalDateTime
-                        };
-
-                        branchInfo.Commits.Add(commitInfo);
-                    }
-
-                    branchInfoList.Add(branchInfo);
-                }
+                var commits = await github.Repository.Commit.GetAll(owner, repo, new CommitRequest { Sha = branch.Name });
+                branchCommits.Add(commits.ToList());
             }
 
+            // Convert the data into a format that can be easily consumed by the frontend
+            var branchHistory = new List<object>();
+            for (int i = 0; i < branches.Count; i++)
+            {
+                var branch = branches[i];
+                var commits = branchCommits[i];
 
-            return branchInfoList;
+                var branchData = new
+                {
+                    name = branch.Name,
+                    commitCount = commits.Count,
+                    commits = commits.Select(commit => new
+                    {
+                        hash = commit.Sha,
+                        author = commit.Author.Login,
+                        date = commit.Commit.Author.Date,
+                        message = commit.Commit.Message,
+                        parentHashes = commit.Parents.Select(parent => parent.Sha).ToList()
+                    }).ToList()
+                };
+                branchHistory.Add(branchData);
+            }
+
+            return Ok(branchHistory);
         }
     }
 }

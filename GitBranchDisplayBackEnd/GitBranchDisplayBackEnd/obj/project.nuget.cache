@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Pu6pFQZ48gEzcF76mQIe3jdhQzVN8g0jI0FGq9zdvSOr2CAFS/G13mE1jhUXXK6eDwMquDCEs2Zd1cjqe8jL8g==",
+  "dgSpecHash": "OldpUr7ecC3xEkeEQhMfZFLJrMyNqkGrpf/pH6I5sqLe4C0v7v0lQCwUdGHGTdl4I0YqBxaw36m6OfX9XAeFYw==",
   "success": true,
   "projectFilePath": "E:\\CodeCool\\Pet\\git-branch-display\\GitBranchDisplayBackEnd\\GitBranchDisplayBackEnd\\GitBranchDisplayBackEnd.csproj",
   "expectedPackageFiles": [
@@ -8,6 +8,8 @@
     "C:\\Users\\scheu\\.nuget\\packages\\libgit2sharp.nativebinaries\\2.0.306\\libgit2sharp.nativebinaries.2.0.306.nupkg.sha512",
     "C:\\Users\\scheu\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
     "C:\\Users\\scheu\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\scheu\\.nuget\\packages\\newtonsoft.json\\13.0.2\\newtonsoft.json.13.0.2.nupkg.sha512",
+    "C:\\Users\\scheu\\.nuget\\packages\\octokit\\5.0.0\\octokit.5.0.0.nupkg.sha512",
     "C:\\Users\\scheu\\.nuget\\packages\\swashbuckle.aspnetcore\\6.2.3\\swashbuckle.aspnetcore.6.2.3.nupkg.sha512",
     "C:\\Users\\scheu\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.2.3\\swashbuckle.aspnetcore.swagger.6.2.3.nupkg.sha512",
     "C:\\Users\\scheu\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.2.3\\swashbuckle.aspnetcore.swaggergen.6.2.3.nupkg.sha512",

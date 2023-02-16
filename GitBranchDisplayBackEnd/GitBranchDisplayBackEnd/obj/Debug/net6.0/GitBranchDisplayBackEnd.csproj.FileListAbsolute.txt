@@ -45,3 +45,5 @@ E:\CodeCool\Pet\git-branch-display\GitBranchDisplayBackEnd\GitBranchDisplayBackE
 E:\CodeCool\Pet\git-branch-display\GitBranchDisplayBackEnd\GitBranchDisplayBackEnd\obj\Debug\net6.0\GitBranchDisplayBackEnd.pdb
 E:\CodeCool\Pet\git-branch-display\GitBranchDisplayBackEnd\GitBranchDisplayBackEnd\obj\Debug\net6.0\GitBranchDisplayBackEnd.genruntimeconfig.cache
 E:\CodeCool\Pet\git-branch-display\GitBranchDisplayBackEnd\GitBranchDisplayBackEnd\obj\Debug\net6.0\ref\GitBranchDisplayBackEnd.dll
+E:\CodeCool\Pet\git-branch-display\GitBranchDisplayBackEnd\GitBranchDisplayBackEnd\bin\Debug\net6.0\Newtonsoft.Json.dll
+E:\CodeCool\Pet\git-branch-display\GitBranchDisplayBackEnd\GitBranchDisplayBackEnd\bin\Debug\net6.0\Octokit.dll
