@@ -1,5 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Diagnostics;
+using GitBranchDisplayBackEnd.Models;
+using Microsoft.AspNetCore.Mvc;
 using Octokit;
+using LibGit2Sharp;
+using LibBranch = LibGit2Sharp.Branch;
+using LibCommit = LibGit2Sharp.Commit;
+using LibRepository = LibGit2Sharp.Repository;
 
 namespace GitBranchDisplayBackEnd.Controllers
 {
@@ -14,52 +20,52 @@ namespace GitBranchDisplayBackEnd.Controllers
             _httpClient = httpClient;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetBranchHistory(string repoLink)
+
+        [HttpGet("commits")]
+        public List<CommitSourceBranch>? GetAllCommits(string repoLink)
         {
-            var github = new GitHubClient(new ProductHeaderValue("my-app"));
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var commitSourceBranches = new List<CommitSourceBranch>();
 
-            // Parse the URL to extract the owner and repository names
-            var uri = new Uri(repoLink);
-            var segments = uri.Segments;
-            var owner = segments[1].TrimEnd('/');
-            var repo = segments[2].TrimEnd('/');
+            LibRepository.Clone(repoLink, tempDirectory);
 
-            // Get the list of branches for the repository
-            var branches = await github.Repository.Branch.GetAll(owner, repo);
-
-            // For each branch, get the list of commits
-            var branchCommits = new List<List<GitHubCommit>>();
-            foreach (var branch in branches)
+            using (var repo = new LibRepository(tempDirectory))
             {
-                var commits = await github.Repository.Commit.GetAll(owner, repo, new CommitRequest { Sha = branch.Name });
-                branchCommits.Add(commits.ToList());
-            }
 
-            // Convert the data into a format that can be easily consumed by the frontend
-            var branchHistory = new List<object>();
-            for (int i = 0; i < branches.Count; i++)
-            {
-                var branch = branches[i];
-                var commits = branchCommits[i];
-
-                var branchData = new
+                // Execute `git log --branches --source` command
+                var startInfo = new ProcessStartInfo("git",@"log --pretty=format:""%H %S"" --all --source")
                 {
-                    name = branch.Name,
-                    commitCount = commits.Count,
-                    commits = commits.Select(commit => new
-                    {
-                        hash = commit.Sha,
-                        author = commit.Author.Login,
-                        date = commit.Commit.Author.Date,
-                        message = commit.Commit.Message,
-                        parentHashes = commit.Parents.Select(parent => parent.Sha).ToList()
-                    }).ToList()
+                    WorkingDirectory = tempDirectory,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
                 };
-                branchHistory.Add(branchData);
+
+                using (var process = Process.Start(startInfo))
+                {
+                    var output = process.StandardOutput.ReadToEnd();
+                    var lines = output.Split("\n");
+                    foreach (var line in lines)
+                    {
+                        var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 2 && (parts[1].StartsWith("refs/heads/") || parts[1].StartsWith("refs/remotes/origin/")))
+                        {
+                            commitSourceBranches.Add(new CommitSourceBranch
+                            {
+                                Sha = parts[0],
+                                Branch = parts[1].Replace("refs/heads/", "").Replace("refs/remotes/origin/", "")
+                            });
+                        }
+                    }
+                }
             }
 
-            return Ok(branchHistory);
+            return commitSourceBranches;
         }
+
+
+
+
     }
+        
 }
+
