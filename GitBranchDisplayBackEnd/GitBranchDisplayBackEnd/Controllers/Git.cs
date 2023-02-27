@@ -20,15 +20,79 @@ namespace GitBranchDisplayBackEnd.Controllers
             _httpClient = httpClient;
         }
 
-
-        [HttpGet("commits")]
-        public List<CommitSourceBranch>? GetAllCommits(string repoLink)
+        [HttpGet]
+        public Dictionary<string, CommitNode> GetCommitHistory(string repoLink)
         {
             var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            var commitSourceBranches = new List<CommitSourceBranch>();
-
             LibRepository.Clone(repoLink, tempDirectory);
 
+            var commitNodes = new Dictionary<string, CommitNode>();
+
+            var commitSourceBranches = GetCommitsSource(tempDirectory);
+
+            using (var repo = new LibRepository(tempDirectory))
+            {
+                void AddParentCommits(LibCommit commit)
+                {
+                    foreach (var parent in commit.Parents)
+                    {
+                        if (!commitNodes.ContainsKey(parent.Sha))
+                        {
+                            var parentCommitNode = new CommitNode(new Models.Commit()
+                            {
+                                Sha = parent.Sha,
+                                Message = parent.Message,
+                                ShortMessage = parent.MessageShort,
+                                SourceBranch = commitSourceBranches.FirstOrDefault(x => x.Sha == parent.Sha)?.Branch
+                            });
+
+                            commitNodes.Add(parent.Sha, parentCommitNode);
+
+                            AddParentCommits(parent);
+                        }
+                    }
+                }
+
+                foreach (LibCommit commit in repo.Commits)
+                {
+                    var commitNode = new CommitNode(new Models.Commit()
+                    {
+                        Sha = commit.Sha,
+                        Message = commit.Message,
+                        ShortMessage = commit.MessageShort,
+                        SourceBranch = commitSourceBranches.FirstOrDefault(x => x.Sha == commit.Sha).Branch,
+
+                    });
+
+                    AddParentCommits(commit);
+
+                    if (!commitNodes.ContainsKey(commit.Sha))
+                    {
+                        commitNodes.Add(commit.Sha, commitNode);
+                    }
+                    else
+                    {
+                        commitNodes[commit.Sha] = commitNode;
+                    }
+
+                    foreach (LibCommit parent in commit.Parents)
+                    {
+                        string parentSha = parent.Sha;
+                        if (commitNodes.ContainsKey(parentSha))
+                        {
+                            commitNode.Parents.Add(commitNodes[parentSha]);
+                        }
+                    }
+                }
+            }
+
+            return commitNodes;
+        }
+
+
+        private List<CommitSourceBranch>? GetCommitsSource(string tempDirectory)
+        {
+            var commitSourceBranches = new List<CommitSourceBranch>();
             using (var repo = new LibRepository(tempDirectory))
             {
 
