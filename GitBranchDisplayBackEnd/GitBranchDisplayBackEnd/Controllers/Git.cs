@@ -6,6 +6,7 @@ using LibGit2Sharp;
 using LibBranch = LibGit2Sharp.Branch;
 using LibCommit = LibGit2Sharp.Commit;
 using LibRepository = LibGit2Sharp.Repository;
+using System.IO;
 
 namespace GitBranchDisplayBackEnd.Controllers
 {
@@ -23,8 +24,8 @@ namespace GitBranchDisplayBackEnd.Controllers
         [HttpGet]
         public Dictionary<string, CommitNode> GetCommitHistory(string repoLink)
         {
-            var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            LibRepository.Clone(repoLink, tempDirectory);
+            var tempDirectory = Path.Combine("./RepoTemp", Path.GetRandomFileName());
+            LibRepository.Clone(repoLink, tempDirectory, new CloneOptions() {IsBare = true});
 
             var commitNodes = new Dictionary<string, CommitNode>();
             var order = new List<CommitNode>();
@@ -89,11 +90,24 @@ namespace GitBranchDisplayBackEnd.Controllers
                 }
             }
 
+            DeleteTempDir(tempDirectory);
+
             order.Reverse();
             return order.ToDictionary(x => x.Commit.Sha, y => commitNodes[y.Commit.Sha]);
 
         }
 
+        private void DeleteTempDir(string Path)
+        {
+            var directory = new DirectoryInfo(Path) { Attributes = FileAttributes.Normal };
+
+            foreach (var info in directory.GetFileSystemInfos("*", SearchOption.AllDirectories))
+            {
+                info.Attributes = FileAttributes.Normal;
+            }
+
+            Directory.Delete(Path, true);
+        }
 
         private List<CommitSourceBranch>? GetCommitsSource(string tempDirectory)
         {
