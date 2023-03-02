@@ -27,6 +27,7 @@ namespace GitBranchDisplayBackEnd.Controllers
             LibRepository.Clone(repoLink, tempDirectory);
 
             var commitNodes = new Dictionary<string, CommitNode>();
+            var order = new List<CommitNode>();
 
             var commitSourceBranches = GetCommitsSource(tempDirectory);
 
@@ -53,6 +54,7 @@ namespace GitBranchDisplayBackEnd.Controllers
                     }
                 }
 
+                
                 foreach (LibCommit commit in repo.Commits)
                 {
                     var commitNode = new CommitNode(new Models.Commit()
@@ -63,6 +65,7 @@ namespace GitBranchDisplayBackEnd.Controllers
                         SourceBranch = commitSourceBranches.FirstOrDefault(x => x.Sha == commit.Sha).Branch,
 
                     });
+                    order.Add(commitNode);
 
                     AddParentCommits(commit);
 
@@ -86,7 +89,9 @@ namespace GitBranchDisplayBackEnd.Controllers
                 }
             }
 
-            return commitNodes;
+            order.Reverse();
+            return order.ToDictionary(x => x.Commit.Sha, y => commitNodes[y.Commit.Sha]);
+
         }
 
 
@@ -96,7 +101,6 @@ namespace GitBranchDisplayBackEnd.Controllers
             using (var repo = new LibRepository(tempDirectory))
             {
 
-                // Execute `git log --branches --source` command
                 var startInfo = new ProcessStartInfo("git",@"log --pretty=format:""%H %S"" --all --source")
                 {
                     WorkingDirectory = tempDirectory,
