@@ -4,18 +4,27 @@ import { AppComponent } from './app.component';
 import { BranchHistoryComponent } from './branch-history/branch-history.component';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
+import { RepoInputComponent } from './repo-input/repo-input.component';
+import { FormsModule } from '@angular/forms';
 
 const routes: Routes = [
-  { path: '', component: BranchHistoryComponent},
+  { 
+    path: '', component: RepoInputComponent
+  },
+  {
+    path:'History/:link', component: BranchHistoryComponent
+  }
 ]
 
 @NgModule({
   declarations: [
     AppComponent,
-    BranchHistoryComponent
+    BranchHistoryComponent,
+    RepoInputComponent
   ],
   imports: [
     BrowserModule,
+    FormsModule,
     RouterModule.forRoot(routes),
     HttpClientModule
   ],

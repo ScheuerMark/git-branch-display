@@ -3,6 +3,7 @@ import { GitApiService } from '../git-api.service';
 import { DataSet, Edge, Node } from 'vis';
 import { Network } from 'vis';
 import * as dagre from 'dagre';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
 
 @Component({
@@ -13,17 +14,22 @@ import * as dagre from 'dagre';
 export class BranchHistoryComponent implements OnInit {
   @ViewChild('branchHistory', { static: true }) branchHistory!: ElementRef;
 
-  constructor(private gitApiService: GitApiService) {}
+  constructor(
+    private gitApiService: GitApiService,
+    private route: ActivatedRoute,
+    ) {}
 
   ngOnInit() {
    const data = new DataSet();
    const edges = new DataSet<Edge>();
-
+   let encodedLink = this.route.snapshot.queryParamMap.get('link');
+   let link = decodeURIComponent(encodedLink!);
+   console.log(link);
    const branchToGroup: Record<string, number> = {}; 
    let groupCount = 0;
    let x = 0;
 
-   this.gitApiService.getBranchHistory("https://github.com/ScheuerMark/test-branches").subscribe((commitHistory: any) => {
+   this.gitApiService.getBranchHistory(`https://github.com/${link}`).subscribe((commitHistory: any) => {
      for (const sha in commitHistory) {
       const commit = commitHistory[sha];
       const branch = commit.commit.sourceBranch;
@@ -50,6 +56,8 @@ export class BranchHistoryComponent implements OnInit {
     const options = {
       autoResize: true,
       groups: groupOptions,
+      width:"97vw",
+      height:"100%",
       layout: {
         randomSeed:1,
         improvedLayout:true,
