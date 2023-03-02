@@ -6,6 +6,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { RepoInputComponent } from './repo-input/repo-input.component';
 import { FormsModule } from '@angular/forms';
+import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
 
 const routes: Routes = [
   { 
@@ -20,7 +21,8 @@ const routes: Routes = [
   declarations: [
     AppComponent,
     BranchHistoryComponent,
-    RepoInputComponent
+    RepoInputComponent,
+    LoadingSpinnerComponent
   ],
   imports: [
     BrowserModule,
