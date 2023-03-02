@@ -129,12 +129,12 @@ namespace GitBranchDisplayBackEnd.Controllers
                     foreach (var line in lines)
                     {
                         var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length == 2 && (parts[1].StartsWith("refs/heads/") || parts[1].StartsWith("refs/remotes/origin/")))
+                        if (parts.Length == 2 && (parts[1].StartsWith("refs/heads/") || parts[1].StartsWith("refs/remotes/origin/") || parts[1].StartsWith("refs/tags/")))
                         {
                             commitSourceBranches.Add(new CommitSourceBranch
                             {
                                 Sha = parts[0],
-                                Branch = parts[1].Replace("refs/heads/", "").Replace("refs/remotes/origin/", "")
+                                Branch = parts[1].Replace("refs/heads/", "").Replace("refs/remotes/origin/", "").Replace("refs/tags/", "")
                             });
                         }
                     }

@@ -5,6 +5,8 @@
 /tmp
 /out-tsc
 /bazel-out
+RepoTemp/
+/RepoTemp/
 
 # Node
 /node_modules
