@@ -1,7 +1,8 @@
 import { Component, Input, OnInit, ViewChild,ElementRef  } from '@angular/core';
 import { GitApiService } from '../git-api.service';
-import { DataSet, Edge } from 'vis';
+import { DataSet, Edge, Node } from 'vis';
 import { Network } from 'vis';
+import * as dagre from 'dagre';
 
 
 @Component({
@@ -20,6 +21,7 @@ export class BranchHistoryComponent implements OnInit {
 
    const branchToGroup: Record<string, number> = {}; 
    let groupCount = 0;
+   let x = 0;
 
    this.gitApiService.getBranchHistory("https://github.com/ScheuerMark/test-branches").subscribe((commitHistory: any) => {
      for (const sha in commitHistory) {
@@ -31,63 +33,91 @@ export class BranchHistoryComponent implements OnInit {
         groupCount++;
         branchToGroup[branch] = groupId;
       }
-      data.add({ id: sha, label: commit.commit.shortMessage, group: groupId, type:'node'  });
+      console.log(commitHistory[sha]);
+      data.add({ id: sha, label: shortenLabel(commit.commit.shortMessage,15), group: groupId,y: (groupId*50),x: (x*150),});
       for (const parent of commit.parents) {
-        edges.add({ from: sha, to: parent.commit.sha });
+        edges.add({ from: parent.commit.sha, to: sha });
       }
+      x++;
     }
 
     const groupOptions: { [id: string]: { color: string} } = {};
     for (const branch in branchToGroup) {
       const groupId = branchToGroup[branch];
-      groupOptions[groupId] = { color: this.getGroupColor(branch) }; 
+      groupOptions[groupId] = { color: getGroupColor(branch) }; 
     }
 
-     const options = {
+    const options = {
+      autoResize: true,
       groups: groupOptions,
       layout: {
+        randomSeed:1,
+        improvedLayout:true,
         hierarchical: {
-          direction: 'LR',
-          nodeSpacing: 100,
-          sortMethod: 'directed',
+          enabled:false
         },
-        alignment: 'center',
+      },
+      nodes:{
+        fixed: {x:true,y:true},
+        shape:"box",
+      },
+      edges:{
+        arrows: {
+          to: {
+            enabled: true,
+            type:"arrow",
+            scaleFactor:0.7
+          }
+        }
       },
       interaction: {
         dragNodes: false,
-        dragView: false,
+        dragView: true,
       },
+      physics:{
+        enabled:false,
+      }
     };
      const network = new Network(this.branchHistory.nativeElement, { nodes: data, edges: edges }, options);
+     
    });
   }
 
-  getGroupColor(branch: string): string {
-    const colors = [
-      "#F94144",
-      "#F3722C",
-      "#F8961E",
-      "#F9C74F",
-      "#90BE6D",
-      "#43AA8B",
-      "#577590",
-      "#4D4D4D",
-    ];
-    const index = Math.abs(this.hashCode(branch)) % colors.length;
-    return colors[index];
-  }
+}
 
-  hashCode(str: string): number {
-    let hash = 0;
-    if (str.length === 0) {
-      return hash;
-    }
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
+function shortenLabel(label : string, maxLength : number) {
+  if (label.length > maxLength) {
+    return label.substring(0, maxLength) + '...';
+  } else {
+    return label;
+  }
+}
+
+function hashCode(str: string): number {
+  let hash = 0;
+  if (str.length === 0) {
     return hash;
   }
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return hash;
+}
+
+function getGroupColor(branch: string): string {
+  const colors = [
+    "#F94144",
+    "#F3722C",
+    "#F8961E",
+    "#F9C74F",
+    "#90BE6D",
+    "#43AA8B",
+    "#577590",
+    "#4D4D4D",
+  ];
+  const index = Math.abs(hashCode(branch)) % colors.length;
+  return colors[index];
 }
 
