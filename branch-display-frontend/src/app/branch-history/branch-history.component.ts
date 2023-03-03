@@ -40,7 +40,7 @@ export class BranchHistoryComponent implements OnInit {
         groupCount++;
         branchToGroup[branch] = groupId;
       }
-      data.add({ id: sha, label:shortenLabel(commit.commit.shortMessage,15) + "\n" + shortenLabel(branch,15), group: groupId,y: (groupId*50),x: (x*150),});
+      data.add({ id: sha, label:shortenLabel(commit.commit.shortMessage,15) + "\n" + shortenLabel(branch,15),level:groupId, group: groupId,y: (groupId*50),x: (x*150),});
       for (const parent of commit.parents) {
         edges.add({ from: parent.commit.sha, to: sha });
       }
@@ -62,7 +62,9 @@ export class BranchHistoryComponent implements OnInit {
         randomSeed:1,
         improvedLayout:true,
         hierarchical: {
-          enabled:false
+          enabled:false,
+          direction:"UD",
+          nodeSpacing: 200,
         },
       },
       nodes:{
